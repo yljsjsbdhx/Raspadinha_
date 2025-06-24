@@ -1,69 +1,122 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raspadinha Interativa</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        #scratch-container {
-            width: 400px;
-            height: 300px;
-            position: relative;
-        }
-        #scratch-container canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Raspadinha Interativa</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f2f2f2;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      position: relative;
+      width: 400px;
+      height: 300px;
+      background-image: url('https://i.imgur.com/7ASlYYY.jpg');
+      background-size: cover;
+      border: 3px solid #000;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .title {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+      z-index: 2;
+      text-shadow: 1px 1px 4px black;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+  </style>
 </head>
 <body>
-    <div id="scratch-container">
-        <canvas id="scratchCanvas" width="400" height="300"></canvas>
-    </div>
+  <div class="container">
+    <div class="title">Nossa raspadinha especial🤍🤍</div>
+    <canvas id="scratchCanvas"></canvas>
+  </div>
 
-    <script>
-        const canvas = document.getElementById('scratchCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        const imageBackground = new Image();
-        imageBackground.src = 'https://yourimageurl.com/background.jpg';  // Substitua com sua imagem
-        
-        const imageCover = new Image();
-        imageCover.src = 'https://yourimageurl.com/cover.png';  // Imagem de "raspe aqui"
-        
-        imageBackground.onload = () => {
-            ctx.drawImage(imageBackground, 0, 0, canvas.width, canvas.height);
-        }
+  <script>
+    const canvas = document.getElementById('scratchCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.querySelector('.container');
 
-        imageCover.onload = () => {
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.drawImage(imageCover, 0, 0, canvas.width, canvas.height);
-        }
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
 
-        canvas.addEventListener('mousemove', (e) => {
-            if (e.buttons !== 1) return;
-            ctx.beginPath();
-            ctx.arc(e.offsetX, e.offsetY, 30, 0, 2 * Math.PI);
-            ctx.fill();
-        });
+    // Preencher a camada de raspagem (cinza)
+    ctx.fillStyle = '#bbbbbb';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            ctx.beginPath();
-            ctx.arc(touch.offsetX, touch.offsetY, 30, 0, 2 * Math.PI);
-            ctx.fill();
-        });
-    </script>
+    ctx.globalCompositeOperation = 'destination-out';
+
+    function draw(x, y) {
+      ctx.beginPath();
+      ctx.arc(x, y, 20, 0, Math.PI * 2, false);
+      ctx.fill();
+    }
+
+    function getXY(e) {
+      const rect = canvas.getBoundingClientRect();
+      if (e.touches) {
+        return {
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top
+        };
+      } else {
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
+    }
+
+    let scratching = false;
+
+    // Eventos de mouse
+    canvas.addEventListener('mousedown', (e) => {
+      scratching = true;
+      const { x, y } = getXY(e);
+      draw(x, y);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!scratching) return;
+      const { x, y } = getXY(e);
+      draw(x, y);
+    });
+
+    canvas.addEventListener('mouseup', () => scratching = false);
+    canvas.addEventListener('mouseleave', () => scratching = false);
+
+    // Eventos de toque (celular/tablet)
+    canvas.addEventListener('touchstart', (e) => {
+      scratching = true;
+      const { x, y } = getXY(e);
+      draw(x, y);
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (!scratching) return;
+      e.preventDefault(); // evita rolagem enquanto raspa
+      const { x, y } = getXY(e);
+      draw(x, y);
+    });
+
+    canvas.addEventListener('touchend', () => scratching = false);
+  </script>
 </body>
 </html>
