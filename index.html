@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspadinha Interativa</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #scratch-container {
+            width: 400px;
+            height: 300px;
+            position: relative;
+        }
+        #scratch-container canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="scratch-container">
+        <canvas id="scratchCanvas" width="400" height="300"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('scratchCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const imageBackground = new Image();
+        imageBackground.src = 'https://yourimageurl.com/background.jpg';  // Substitua com sua imagem
+        
+        const imageCover = new Image();
+        imageCover.src = 'https://yourimageurl.com/cover.png';  // Imagem de "raspe aqui"
+        
+        imageBackground.onload = () => {
+            ctx.drawImage(imageBackground, 0, 0, canvas.width, canvas.height);
+        }
+
+        imageCover.onload = () => {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.drawImage(imageCover, 0, 0, canvas.width, canvas.height);
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (e.buttons !== 1) return;
+            ctx.beginPath();
+            ctx.arc(e.offsetX, e.offsetY, 30, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            ctx.beginPath();
+            ctx.arc(touch.offsetX, touch.offsetY, 30, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+    </script>
+</body>
+</html>
